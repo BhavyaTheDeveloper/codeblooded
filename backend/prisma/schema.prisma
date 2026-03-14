@@ -1,0 +1,333 @@
+// Inventory Management System — Prisma Schema
+// Every stock movement creates stock_ledger entries for audit.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Auth & Users
+// ─────────────────────────────────────────────────────────────────────────────
+
+model User {
+  id            String   @id @default(cuid())
+  email         String   @unique
+  passwordHash  String   @map("password_hash")
+  name          String?
+  role          String   @default("USER") // USER | ADMIN
+  emailVerified Boolean  @default(false)  @map("email_verified")
+  otpCode       String?  @map("otp_code")
+  otpExpiresAt  DateTime? @map("otp_expires_at")
+  createdAt     DateTime @default(now())  @map("created_at")
+  updatedAt     DateTime @updatedAt       @map("updated_at")
+
+  receipts      Receipt[]
+  deliveries    Delivery[]
+  transfers     Transfer[]
+  adjustments   Adjustment[]
+  stockLedger   StockLedgerEntry[]
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Catalog
+// ─────────────────────────────────────────────────────────────────────────────
+
+model Category {
+  id          String    @id @default(cuid())
+  name        String
+  description String?
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt      @map("updated_at")
+
+  products Product[]
+}
+
+model Product {
+  id          String   @id @default(cuid())
+  sku         String   @unique
+  name        String
+  description String?
+  unit        String   @default("UNIT") // UNIT, KG, L, etc.
+  minStock    Int      @default(0)      @map("min_stock")
+  categoryId  String?  @map("category_id")
+  createdAt   DateTime @default(now())  @map("created_at")
+  updatedAt   DateTime @updatedAt       @map("updated_at")
+
+  category       Category?          @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  inventory      Inventory[]
+  receiptItems   ReceiptItem[]
+  deliveryItems  DeliveryItem[]
+  transferItems  TransferItem[]
+  adjustmentItems AdjustmentItem[]
+  stockLedger    StockLedgerEntry[]
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Warehouses & Locations
+// ─────────────────────────────────────────────────────────────────────────────
+
+model Warehouse {
+  id        String   @id @default(cuid())
+  code      String   @unique
+  name      String
+  address   String?
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt      @map("updated_at")
+
+  locations    Location[]
+  receipts     Receipt[]
+  deliveries   Delivery[]
+  transfersFrom Transfer[] @relation("TransferFromWarehouse")
+  transfersTo   Transfer[] @relation("TransferToWarehouse")
+  adjustments  Adjustment[]
+  inventory    Inventory[]
+  stockLedger  StockLedgerEntry[]
+}
+
+model Location {
+  id          String   @id @default(cuid())
+  code        String   // e.g. A-01-02
+  name        String?
+  warehouseId String   @map("warehouse_id")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt      @map("updated_at")
+
+  warehouse          Warehouse       @relation(fields: [warehouseId], references: [id], onDelete: Cascade)
+  inventory          Inventory[]
+  stockLedger        StockLedgerEntry[]
+  receiptItems       ReceiptItem[]
+  deliveryItems      DeliveryItem[]
+  transferItemsFrom  TransferItem[]   @relation("TransferFromLocation")
+  transferItemsTo    TransferItem[]   @relation("TransferToLocation")
+  adjustmentItems    AdjustmentItem[]
+
+  @@unique([warehouseId, code])
+  @@map("locations")
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Current Stock (product + warehouse + location)
+// ─────────────────────────────────────────────────────────────────────────────
+
+model Inventory {
+  id          String   @id @default(cuid())
+  productId   String   @map("product_id")
+  warehouseId String   @map("warehouse_id")
+  locationId  String   @map("location_id")
+  quantity    Int      @default(0)
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  product   Product   @relation(fields: [productId], references: [id], onDelete: Cascade)
+  warehouse Warehouse @relation(fields: [warehouseId], references: [id], onDelete: Cascade)
+  location  Location  @relation(fields: [locationId], references: [id], onDelete: Cascade)
+
+  @@unique([productId, warehouseId, locationId])
+  @@map("inventory")
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Receipts (Incoming stock)
+// ─────────────────────────────────────────────────────────────────────────────
+
+enum ReceiptStatus {
+  DRAFT
+  VALIDATED
+}
+
+model Receipt {
+  id          String        @id @default(cuid())
+  receiptNumber String       @unique @map("receipt_number") // e.g. RCP-2024-001
+  supplier    String?
+  warehouseId String        @map("warehouse_id")
+  status      ReceiptStatus @default(DRAFT)
+  notes       String?
+  createdById String?       @map("created_by_id")
+  validatedAt DateTime?     @map("validated_at")
+  createdAt   DateTime      @default(now()) @map("created_at")
+  updatedAt   DateTime      @updatedAt      @map("updated_at")
+
+  createdBy User?         @relation(fields: [createdById], references: [id], onDelete: SetNull)
+  warehouse Warehouse     @relation(fields: [warehouseId], references: [id], onDelete: Restrict)
+  items     ReceiptItem[]
+}
+
+model ReceiptItem {
+  id         String  @id @default(cuid())
+  receiptId  String  @map("receipt_id")
+  productId  String  @map("product_id")
+  locationId String @map("location_id")  // destination location in warehouse
+  quantity   Int
+  unit       String @default("UNIT")
+
+  receipt  Receipt  @relation(fields: [receiptId], references: [id], onDelete: Cascade)
+  product  Product  @relation(fields: [productId], references: [id], onDelete: Restrict)
+  location Location @relation(fields: [locationId], references: [id], onDelete: Restrict)
+
+  @@map("receipt_items")
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Deliveries (Outgoing stock)
+// ─────────────────────────────────────────────────────────────────────────────
+
+enum DeliveryStatus {
+  DRAFT
+  PICKED
+  PACKED
+  VALIDATED
+}
+
+model Delivery {
+  id             String         @id @default(cuid())
+  deliveryNumber String         @unique @map("delivery_number")
+  customer       String?
+  warehouseId    String         @map("warehouse_id")
+  status         DeliveryStatus @default(DRAFT)
+  notes          String?
+  createdById    String?        @map("created_by_id")
+  validatedAt    DateTime?      @map("validated_at")
+  createdAt      DateTime       @default(now()) @map("created_at")
+  updatedAt      DateTime       @updatedAt      @map("updated_at")
+
+  createdBy  User?         @relation(fields: [createdById], references: [id], onDelete: SetNull)
+  warehouse  Warehouse     @relation(fields: [warehouseId], references: [id], onDelete: Restrict)
+  items      DeliveryItem[]
+}
+
+model DeliveryItem {
+  id          String @id @default(cuid())
+  deliveryId  String @map("delivery_id")
+  productId   String @map("product_id")
+  locationId  String @map("location_id") // pick from this location
+  quantity    Int
+  unit        String @default("UNIT")
+
+  delivery Delivery @relation(fields: [deliveryId], references: [id], onDelete: Cascade)
+  product  Product  @relation(fields: [productId], references: [id], onDelete: Restrict)
+  location Location @relation(fields: [locationId], references: [id], onDelete: Restrict)
+
+  @@map("delivery_items")
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Internal Transfers
+// ─────────────────────────────────────────────────────────────────────────────
+
+enum TransferStatus {
+  DRAFT
+  VALIDATED
+}
+
+model Transfer {
+  id             String        @id @default(cuid())
+  transferNumber String        @unique @map("transfer_number")
+  fromWarehouseId String       @map("from_warehouse_id")
+  toWarehouseId   String       @map("to_warehouse_id")
+  status         TransferStatus @default(DRAFT)
+  notes          String?
+  createdById    String?       @map("created_by_id")
+  validatedAt    DateTime?     @map("validated_at")
+  createdAt      DateTime      @default(now()) @map("created_at")
+  updatedAt      DateTime      @updatedAt      @map("updated_at")
+
+  createdBy    User?          @relation(fields: [createdById], references: [id], onDelete: SetNull)
+  fromWarehouse Warehouse     @relation("TransferFromWarehouse", fields: [fromWarehouseId], references: [id], onDelete: Restrict)
+  toWarehouse   Warehouse     @relation("TransferToWarehouse", fields: [toWarehouseId], references: [id], onDelete: Restrict)
+  items         TransferItem[]
+}
+
+model TransferItem {
+  id             String @id @default(cuid())
+  transferId     String @map("transfer_id")
+  productId      String @map("product_id")
+  fromLocationId String @map("from_location_id")
+  toLocationId   String @map("to_location_id")
+  quantity       Int
+  unit          String @default("UNIT")
+
+  transfer       Transfer  @relation(fields: [transferId], references: [id], onDelete: Cascade)
+  product        Product   @relation(fields: [productId], references: [id], onDelete: Restrict)
+  fromLocation   Location  @relation("TransferFromLocation", fields: [fromLocationId], references: [id], onDelete: Restrict)
+  toLocation     Location  @relation("TransferToLocation", fields: [toLocationId], references: [id], onDelete: Restrict)
+
+  @@map("transfer_items")
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Stock Adjustments
+// ─────────────────────────────────────────────────────────────────────────────
+
+enum AdjustmentStatus {
+  DRAFT
+  VALIDATED
+}
+
+model Adjustment {
+  id              String           @id @default(cuid())
+  adjustmentNumber String          @unique @map("adjustment_number")
+  warehouseId     String          @map("warehouse_id")
+  reason          String          // e.g. "Physical count correction", "Damage"
+  status          AdjustmentStatus @default(DRAFT)
+  notes           String?
+  createdById     String?         @map("created_by_id")
+  validatedAt     DateTime?       @map("validated_at")
+  createdAt       DateTime        @default(now()) @map("created_at")
+  updatedAt       DateTime        @updatedAt      @map("updated_at")
+
+  createdBy  User?           @relation(fields: [createdById], references: [id], onDelete: SetNull)
+  warehouse  Warehouse       @relation(fields: [warehouseId], references: [id], onDelete: Restrict)
+  items      AdjustmentItem[]
+}
+
+model AdjustmentItem {
+  id           String  @id @default(cuid())
+  adjustmentId String  @map("adjustment_id")
+  productId    String  @map("product_id")
+  locationId   String  @map("location_id")
+  quantityDelta Int    @map("quantity_delta")  // + or -
+  reason       String?
+
+  adjustment Adjustment @relation(fields: [adjustmentId], references: [id], onDelete: Cascade)
+  product    Product    @relation(fields: [productId], references: [id], onDelete: Restrict)
+  location   Location   @relation(fields: [locationId], references: [id], onDelete: Restrict)
+
+  @@map("adjustment_items")
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Stock Ledger (audit trail for every movement)
+// ─────────────────────────────────────────────────────────────────────────────
+
+enum LedgerDocumentType {
+  RECEIPT
+  DELIVERY
+  TRANSFER
+  ADJUSTMENT
+}
+
+model StockLedgerEntry {
+  id              String            @id @default(cuid())
+  documentType    LedgerDocumentType @map("document_type")
+  documentId      String            @map("document_id")
+  productId       String            @map("product_id")
+  warehouseId     String            @map("warehouse_id")
+  locationId      String            @map("location_id")
+  quantityDelta   Int               @map("quantity_delta")  // + for in, - for out
+  quantityAfter   Int               @map("quantity_after")
+  createdById     String?           @map("created_by_id")
+  createdAt       DateTime          @default(now()) @map("created_at")
+
+  product   Product   @relation(fields: [productId], references: [id], onDelete: Restrict)
+  warehouse Warehouse @relation(fields: [warehouseId], references: [id], onDelete: Restrict)
+  location  Location  @relation(fields: [locationId], references: [id], onDelete: Restrict)
+  createdBy User?     @relation(fields: [createdById], references: [id], onDelete: SetNull)
+
+  @@index([documentType, documentId])
+  @@index([productId, warehouseId, createdAt])
+  @@map("stock_ledger")
+}
