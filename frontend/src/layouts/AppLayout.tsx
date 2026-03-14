@@ -23,36 +23,38 @@ export function AppLayout() {
   };
 
   return (
-    <div className="flex min-h-screen bg-slate-50">
-      <aside className="w-56 bg-slate-900 text-white flex flex-col">
-        <div className="p-4 border-b border-slate-700">
-          <h1 className="font-semibold text-lg">Inventory</h1>
+    <div className="flex min-h-screen bg-canvas">
+      <aside className="w-64 bg-card text-dark flex flex-col border-r-[3px] border-dark">
+        <div className="p-5 border-b-[3px] border-dark bg-accent">
+          <h1 className="font-bold text-2xl uppercase tracking-widest text-dark">Inventory</h1>
         </div>
-        <nav className="flex-1 p-2">
+        <nav className="flex-1 p-4 flex flex-col gap-3">
           {nav.map(({ to, label }) => (
             <Link
               key={to}
               to={to}
-              className={`block px-3 py-2 rounded-md text-sm ${
-                location.pathname === to ? "bg-slate-700 text-white" : "text-slate-300 hover:bg-slate-800 hover:text-white"
+              className={`block px-4 py-3 border-[3px] border-dark rounded-[8px] font-bold uppercase transition-all duration-200 ${
+                location.pathname === to
+                  ? "bg-primary text-white shadow-[4px_4px_0px_0px_var(--color-dark)] -translate-x-[2px] -translate-y-[2px]"
+                  : "bg-card text-dark shadow-[2px_2px_0px_0px_var(--color-dark)] hover:bg-accent hover:-translate-y-[2px] hover:-translate-x-[2px] hover:shadow-[4px_4px_0px_0px_var(--color-dark)]"
               }`}
             >
               {label}
             </Link>
           ))}
         </nav>
-        <div className="p-3 border-t border-slate-700">
-          <p className="text-xs text-slate-400 truncate">{user?.email}</p>
+        <div className="p-4 border-t-[3px] border-dark bg-canvas">
+          <p className="text-sm font-bold text-dark truncate" title={user?.email || ""}>{user?.email}</p>
           <button
             type="button"
             onClick={handleLogout}
-            className="mt-1 text-xs text-slate-400 hover:text-white"
+            className="mt-3 w-full px-4 py-2 bg-dark text-white font-bold uppercase border-[3px] border-dark rounded-[8px] hover:bg-primary-dark hover:text-white hover:-translate-y-[2px] hover:-translate-x-[2px] shadow-[2px_2px_0px_0px_var(--color-dark)] hover:shadow-[4px_4px_0px_0px_var(--color-dark)] transition-all duration-200"
           >
             Log out
           </button>
         </div>
       </aside>
-      <main className="flex-1 overflow-auto p-6">
+      <main className="flex-1 overflow-auto p-8">
         <Outlet />
       </main>
     </div>

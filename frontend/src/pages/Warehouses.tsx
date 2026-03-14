@@ -62,22 +62,22 @@ export function Warehouses() {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-semibold text-slate-800">Warehouses</h1>
+        <h1 className="text-3xl font-bold text-dark uppercase tracking-widest border-b-[3px] border-dark pb-4">Warehouses</h1>
         <button
           type="button"
           onClick={() => setWarehouseModalOpen(true)}
-          className="px-3 py-2 text-sm bg-slate-800 text-white rounded-md hover:bg-slate-700"
+          className="px-3 py-2 text-sm bg-dark text-white font-bold uppercase border-[3px] border-dark rounded-[8px] hover:-translate-y-[2px] hover:-translate-x-[2px] shadow-[2px_2px_0px_0px_var(--color-dark)] hover:shadow-[4px_4px_0px_0px_var(--color-dark)] transition-all duration-200 rounded-md hover:bg-slate-700"
         >
           Add warehouse
         </button>
       </div>
       <Card title="Warehouses & locations">
-        {isLoading && <p className="text-slate-500">Loading…</p>}
-        {error && <p className="text-red-600">Failed to load</p>}
+        {isLoading && <p className="text-muted font-bold uppercase">Loading…</p>}
+        {error && <p className="text-primary font-bold uppercase">Failed to load</p>}
         {data && (
           <DataTable columns={["Code", "Name", "Address", "Locations", "Actions"]}>
             {data.map((w) => (
-              <tr key={w.id}>
+              <tr key={w.id} className="hover:bg-accent transition-colors duration-200">
                 <td className="px-4 py-2 text-sm font-mono">{w.code}</td>
                 <td className="px-4 py-2 text-sm">{w.name}</td>
                 <td className="px-4 py-2 text-sm text-slate-600">{w.address ?? "—"}</td>
@@ -145,42 +145,42 @@ function WarehouseForm({
     <form onSubmit={handleSubmit} className="space-y-3">
       {error && <p className="text-sm text-red-600">{error}</p>}
       <div>
-        <label className="block text-sm font-medium text-slate-700 mb-1">Code *</label>
+        <label className="block text-sm font-bold text-dark uppercase mb-2">Code *</label>
         <input
           type="text"
           value={code}
           onChange={(e) => setCode(e.target.value)}
-          className="w-full px-3 py-2 border border-slate-300 rounded-md"
+          className="w-full px-3 py-2 border-[3px] border-dark rounded-[8px] bg-white text-dark font-bold placeholder-muted focus:outline-none focus:bg-[#fefce8] focus:-translate-y-[2px] focus:-translate-x-[2px] shadow-[2px_2px_0px_0px_var(--color-dark)] focus:shadow-[4px_4px_0px_0px_var(--color-dark)] transition-all duration-200"
           required
         />
       </div>
       <div>
-        <label className="block text-sm font-medium text-slate-700 mb-1">Name *</label>
+        <label className="block text-sm font-bold text-dark uppercase mb-2">Name *</label>
         <input
           type="text"
           value={name}
           onChange={(e) => setName(e.target.value)}
-          className="w-full px-3 py-2 border border-slate-300 rounded-md"
+          className="w-full px-3 py-2 border-[3px] border-dark rounded-[8px] bg-white text-dark font-bold placeholder-muted focus:outline-none focus:bg-[#fefce8] focus:-translate-y-[2px] focus:-translate-x-[2px] shadow-[2px_2px_0px_0px_var(--color-dark)] focus:shadow-[4px_4px_0px_0px_var(--color-dark)] transition-all duration-200"
           required
         />
       </div>
       <div>
-        <label className="block text-sm font-medium text-slate-700 mb-1">Address</label>
+        <label className="block text-sm font-bold text-dark uppercase mb-2">Address</label>
         <input
           type="text"
           value={address}
           onChange={(e) => setAddress(e.target.value)}
-          className="w-full px-3 py-2 border border-slate-300 rounded-md"
+          className="w-full px-3 py-2 border-[3px] border-dark rounded-[8px] bg-white text-dark font-bold placeholder-muted focus:outline-none focus:bg-[#fefce8] focus:-translate-y-[2px] focus:-translate-x-[2px] shadow-[2px_2px_0px_0px_var(--color-dark)] focus:shadow-[4px_4px_0px_0px_var(--color-dark)] transition-all duration-200"
         />
       </div>
       <div className="flex justify-end gap-2 pt-2">
-        <button type="button" onClick={onCancel} className="px-3 py-2 border border-slate-300 rounded-md hover:bg-slate-50">
+        <button type="button" onClick={onCancel} className="px-3 py-2 bg-card text-dark font-bold uppercase border-[3px] border-dark rounded-[8px] hover:bg-accent hover:-translate-y-[2px] hover:-translate-x-[2px] shadow-[2px_2px_0px_0px_var(--color-dark)] hover:shadow-[4px_4px_0px_0px_var(--color-dark)] transition-all duration-200 rounded-md ">
           Cancel
         </button>
         <button
           type="submit"
           disabled={loading}
-          className="px-3 py-2 bg-slate-800 text-white rounded-md hover:bg-slate-700 disabled:opacity-50"
+          className="px-3 py-2 bg-dark text-white font-bold uppercase border-[3px] border-dark rounded-[8px] hover:-translate-y-[2px] hover:-translate-x-[2px] shadow-[2px_2px_0px_0px_var(--color-dark)] hover:shadow-[4px_4px_0px_0px_var(--color-dark)] transition-all duration-200 rounded-md hover:bg-slate-700 disabled:opacity-50"
         >
           {loading ? "Saving…" : "Save"}
         </button>
@@ -216,34 +216,34 @@ function LocationForm({
       {warehouse && <p className="text-sm text-slate-600">Adding to warehouse: <strong>{warehouse.name}</strong></p>}
       {error && <p className="text-sm text-red-600">{error}</p>}
       <div>
-        <label className="block text-sm font-medium text-slate-700 mb-1">Location code *</label>
+        <label className="block text-sm font-bold text-dark uppercase mb-2">Location code *</label>
         <input
           type="text"
           value={code}
           onChange={(e) => setCode(e.target.value)}
           placeholder="e.g. A-01"
-          className="w-full px-3 py-2 border border-slate-300 rounded-md"
+          className="w-full px-3 py-2 border-[3px] border-dark rounded-[8px] bg-white text-dark font-bold placeholder-muted focus:outline-none focus:bg-[#fefce8] focus:-translate-y-[2px] focus:-translate-x-[2px] shadow-[2px_2px_0px_0px_var(--color-dark)] focus:shadow-[4px_4px_0px_0px_var(--color-dark)] transition-all duration-200"
           required
         />
       </div>
       <div>
-        <label className="block text-sm font-medium text-slate-700 mb-1">Name</label>
+        <label className="block text-sm font-bold text-dark uppercase mb-2">Name</label>
         <input
           type="text"
           value={name}
           onChange={(e) => setName(e.target.value)}
           placeholder="e.g. Aisle A, Shelf 1"
-          className="w-full px-3 py-2 border border-slate-300 rounded-md"
+          className="w-full px-3 py-2 border-[3px] border-dark rounded-[8px] bg-white text-dark font-bold placeholder-muted focus:outline-none focus:bg-[#fefce8] focus:-translate-y-[2px] focus:-translate-x-[2px] shadow-[2px_2px_0px_0px_var(--color-dark)] focus:shadow-[4px_4px_0px_0px_var(--color-dark)] transition-all duration-200"
         />
       </div>
       <div className="flex justify-end gap-2 pt-2">
-        <button type="button" onClick={onCancel} className="px-3 py-2 border border-slate-300 rounded-md hover:bg-slate-50">
+        <button type="button" onClick={onCancel} className="px-3 py-2 bg-card text-dark font-bold uppercase border-[3px] border-dark rounded-[8px] hover:bg-accent hover:-translate-y-[2px] hover:-translate-x-[2px] shadow-[2px_2px_0px_0px_var(--color-dark)] hover:shadow-[4px_4px_0px_0px_var(--color-dark)] transition-all duration-200 rounded-md ">
           Cancel
         </button>
         <button
           type="submit"
           disabled={loading}
-          className="px-3 py-2 bg-slate-800 text-white rounded-md hover:bg-slate-700 disabled:opacity-50"
+          className="px-3 py-2 bg-dark text-white font-bold uppercase border-[3px] border-dark rounded-[8px] hover:-translate-y-[2px] hover:-translate-x-[2px] shadow-[2px_2px_0px_0px_var(--color-dark)] hover:shadow-[4px_4px_0px_0px_var(--color-dark)] transition-all duration-200 rounded-md hover:bg-slate-700 disabled:opacity-50"
         >
           {loading ? "Saving…" : "Save"}
         </button>

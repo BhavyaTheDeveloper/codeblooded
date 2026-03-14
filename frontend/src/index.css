@@ -1,4 +1,18 @@
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&display=swap');
+
 @import "tailwindcss";
+
+@theme {
+  --color-canvas: #f4f4f5;
+  --color-card: #ffffff;
+  --color-dark: #1c1c1e;
+  --color-primary: #ff3b30;
+  --color-accent: #ffcc00;
+  --color-success: #34c759;
+  --color-muted: #8e8e93;
+
+  --font-sans: "Space Grotesk", system-ui, -apple-system, sans-serif;
+}
 
 #root {
   min-height: 100vh;
@@ -8,5 +22,25 @@
 
 body {
   margin: 0;
-  font-family: system-ui, -apple-system, sans-serif;
+  font-family: var(--font-sans);
+  background-color: var(--color-canvas);
+  color: var(--color-dark);
+  
+  /* Dotted grid pattern overlay */
+  background-image: radial-gradient(var(--color-dark) 1px, transparent 1px);
+  background-size: 20px 20px;
+}
+
+/* Global brutalist button styles for anything resembling a button by default */
+button {
+  font-family: var(--font-sans);
+  font-weight: 700;
+  text-transform: uppercase;
+  transition: all 0.2s ease;
+}
+
+/* Base input styling */
+input, select, textarea {
+  font-family: var(--font-sans);
+  transition: all 0.2s ease;
 }

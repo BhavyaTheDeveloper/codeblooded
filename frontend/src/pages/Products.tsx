@@ -127,19 +127,19 @@ export function Products() {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-semibold text-slate-800">Products</h1>
+        <h1 className="text-3xl font-bold text-dark uppercase tracking-widest border-b-[3px] border-dark pb-4">Products</h1>
         <div className="flex gap-2">
           <button
             type="button"
             onClick={() => setCategoryModalOpen(true)}
-            className="px-3 py-2 text-sm border border-slate-300 rounded-md hover:bg-slate-50"
+            className="px-3 py-2 text-sm bg-card text-dark font-bold uppercase border-[3px] border-dark rounded-[8px] hover:bg-accent hover:-translate-y-[2px] hover:-translate-x-[2px] shadow-[2px_2px_0px_0px_var(--color-dark)] hover:shadow-[4px_4px_0px_0px_var(--color-dark)] transition-all duration-200 rounded-md "
           >
             Add category
           </button>
           <button
             type="button"
             onClick={() => setProductModalOpen(true)}
-            className="px-3 py-2 text-sm bg-slate-800 text-white rounded-md hover:bg-slate-700"
+            className="px-3 py-2 text-sm bg-dark text-white font-bold uppercase border-[3px] border-dark rounded-[8px] hover:-translate-y-[2px] hover:-translate-x-[2px] shadow-[2px_2px_0px_0px_var(--color-dark)] hover:shadow-[4px_4px_0px_0px_var(--color-dark)] transition-all duration-200 rounded-md hover:bg-slate-700"
           >
             Add product
           </button>
@@ -153,12 +153,12 @@ export function Products() {
             placeholder="Search by SKU or name"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="px-3 py-2 border border-slate-300 rounded-md w-64"
+            className="px-3 py-2 border-[3px] border-dark rounded-[8px] bg-white text-dark font-bold placeholder-muted focus:outline-none focus:bg-[#fefce8] focus:-translate-y-[2px] focus:-translate-x-[2px] shadow-[2px_2px_0px_0px_var(--color-dark)] focus:shadow-[4px_4px_0px_0px_var(--color-dark)] transition-all duration-200 w-64"
           />
           <select
             value={categoryId}
             onChange={(e) => setCategoryId(e.target.value)}
-            className="px-3 py-2 border border-slate-300 rounded-md"
+            className="px-3 py-2 border-[3px] border-dark rounded-[8px] bg-white text-dark font-bold placeholder-muted focus:outline-none focus:bg-[#fefce8] focus:-translate-y-[2px] focus:-translate-x-[2px] shadow-[2px_2px_0px_0px_var(--color-dark)] focus:shadow-[4px_4px_0px_0px_var(--color-dark)] transition-all duration-200"
           >
             <option value="">All categories</option>
             {catRes?.map((c) => (
@@ -171,12 +171,12 @@ export function Products() {
       </Card>
 
       <Card title="Products">
-        {isLoading && <p className="text-slate-500">Loading…</p>}
-        {error && <p className="text-red-600">Failed to load</p>}
+        {isLoading && <p className="text-muted font-bold uppercase">Loading…</p>}
+        {error && <p className="text-primary font-bold uppercase">Failed to load</p>}
         {data && (
           <DataTable columns={["SKU", "Name", "Category", "Unit", "Stock", "Min stock", "Actions"]}>
             {(data.items as ProductRow[]).map((p) => (
-              <tr key={p.id}>
+              <tr key={p.id} className="hover:bg-accent transition-colors duration-200">
                 <td className="px-4 py-2 text-sm">{p.sku}</td>
                 <td className="px-4 py-2 text-sm">{p.name}</td>
                 <td className="px-4 py-2 text-sm">{p.category?.name ?? "—"}</td>
@@ -188,14 +188,14 @@ export function Products() {
                     <button
                       type="button"
                       onClick={() => setEditProduct(p)}
-                      className="px-2 py-1 text-xs border border-slate-300 rounded hover:bg-slate-100"
+                      className="px-2 py-1 text-xs bg-accent text-dark font-bold uppercase border-[3px] border-dark rounded-[6px] hover:bg-accent focus:-translate-y-[1px] focus:-translate-x-[1px] hover:-translate-y-[1px] hover:-translate-x-[1px] shadow-[2px_2px_0px_0px_var(--color-dark)] hover:shadow-[4px_4px_0px_0px_var(--color-dark)] transition-all duration-200"
                     >
                       Edit
                     </button>
                     <button
                       type="button"
                       onClick={() => setDeleteProduct(p)}
-                      className="px-2 py-1 text-xs border border-red-300 text-red-700 rounded hover:bg-red-50"
+                      className="px-2 py-1 text-xs bg-primary text-white font-bold uppercase border-[3px] border-dark rounded-[6px] hover:bg-primary focus:-translate-y-[1px] focus:-translate-x-[1px] hover:-translate-y-[1px] hover:-translate-x-[1px] shadow-[2px_2px_0px_0px_var(--color-dark)] hover:shadow-[4px_4px_0px_0px_var(--color-dark)] transition-all duration-200"
                     >
                       Delete
                     </button>
@@ -259,14 +259,14 @@ export function Products() {
       <Modal open={!!deleteProduct} onClose={() => setDeleteProduct(null)} title="Delete product">
         {deleteProduct && (
           <div className="space-y-3">
-            <p className="text-slate-700">
+            <p className="text-dark font-bold text-lg">
               Delete <strong>{deleteProduct.name}</strong> (SKU: {deleteProduct.sku})? This cannot be undone.
             </p>
             <div className="flex justify-end gap-2">
               <button
                 type="button"
                 onClick={() => setDeleteProduct(null)}
-                className="px-3 py-2 border border-slate-300 rounded-md hover:bg-slate-50"
+                className="px-3 py-2 bg-card text-dark font-bold uppercase border-[3px] border-dark rounded-[8px] hover:bg-accent hover:-translate-y-[2px] hover:-translate-x-[2px] shadow-[2px_2px_0px_0px_var(--color-dark)] hover:shadow-[4px_4px_0px_0px_var(--color-dark)] transition-all duration-200 rounded-md "
               >
                 Cancel
               </button>
@@ -274,7 +274,7 @@ export function Products() {
                 type="button"
                 onClick={() => deleteProductMutation.mutate(deleteProduct.id)}
                 disabled={deleteProductMutation.isPending}
-                className="px-3 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 disabled:opacity-50"
+                className="px-3 py-2 bg-primary text-white font-bold uppercase border-[3px] border-dark rounded-[8px] hover:bg-primary hover:-translate-y-[2px] hover:-translate-x-[2px] shadow-[2px_2px_0px_0px_var(--color-dark)] hover:shadow-[4px_4px_0px_0px_var(--color-dark)] transition-all duration-200 rounded-md  disabled:opacity-50"
               >
                 {deleteProductMutation.isPending ? "Deleting…" : "Delete"}
               </button>
@@ -310,36 +310,36 @@ function CategoryForm({
     <form onSubmit={handleSubmit} className="space-y-3">
       {error && <p className="text-sm text-red-600">{error}</p>}
       <div>
-        <label className="block text-sm font-medium text-slate-700 mb-1">Name *</label>
+        <label className="block text-sm font-bold text-dark uppercase mb-2">Name *</label>
         <input
           type="text"
           value={name}
           onChange={(e) => setName(e.target.value)}
-          className="w-full px-3 py-2 border border-slate-300 rounded-md"
+          className="w-full px-3 py-2 border-[3px] border-dark rounded-[8px] bg-white text-dark font-bold placeholder-muted focus:outline-none focus:bg-[#fefce8] focus:-translate-y-[2px] focus:-translate-x-[2px] shadow-[2px_2px_0px_0px_var(--color-dark)] focus:shadow-[4px_4px_0px_0px_var(--color-dark)] transition-all duration-200"
           required
         />
       </div>
       <div>
-        <label className="block text-sm font-medium text-slate-700 mb-1">Description</label>
+        <label className="block text-sm font-bold text-dark uppercase mb-2">Description</label>
         <input
           type="text"
           value={description}
           onChange={(e) => setDescription(e.target.value)}
-          className="w-full px-3 py-2 border border-slate-300 rounded-md"
+          className="w-full px-3 py-2 border-[3px] border-dark rounded-[8px] bg-white text-dark font-bold placeholder-muted focus:outline-none focus:bg-[#fefce8] focus:-translate-y-[2px] focus:-translate-x-[2px] shadow-[2px_2px_0px_0px_var(--color-dark)] focus:shadow-[4px_4px_0px_0px_var(--color-dark)] transition-all duration-200"
         />
       </div>
       <div className="flex justify-end gap-2 pt-2">
         <button
           type="button"
           onClick={onCancel}
-          className="px-3 py-2 border border-slate-300 rounded-md hover:bg-slate-50"
+          className="px-3 py-2 bg-card text-dark font-bold uppercase border-[3px] border-dark rounded-[8px] hover:bg-accent hover:-translate-y-[2px] hover:-translate-x-[2px] shadow-[2px_2px_0px_0px_var(--color-dark)] hover:shadow-[4px_4px_0px_0px_var(--color-dark)] transition-all duration-200 rounded-md "
         >
           Cancel
         </button>
         <button
           type="submit"
           disabled={loading}
-          className="px-3 py-2 bg-slate-800 text-white rounded-md hover:bg-slate-700 disabled:opacity-50"
+          className="px-3 py-2 bg-dark text-white font-bold uppercase border-[3px] border-dark rounded-[8px] hover:-translate-y-[2px] hover:-translate-x-[2px] shadow-[2px_2px_0px_0px_var(--color-dark)] hover:shadow-[4px_4px_0px_0px_var(--color-dark)] transition-all duration-200 rounded-md hover:bg-slate-700 disabled:opacity-50"
         >
           {loading ? "Saving…" : "Save"}
         </button>
@@ -450,41 +450,41 @@ function ProductForm({
       {error && <p className="text-sm text-red-600">{error}</p>}
       {mode === "create" && (
         <div>
-          <label className="block text-sm font-medium text-slate-700 mb-1">SKU *</label>
+          <label className="block text-sm font-bold text-dark uppercase mb-2">SKU *</label>
           <input
             type="text"
             value={sku}
             onChange={(e) => setSku(e.target.value)}
-            className="w-full px-3 py-2 border border-slate-300 rounded-md"
+            className="w-full px-3 py-2 border-[3px] border-dark rounded-[8px] bg-white text-dark font-bold placeholder-muted focus:outline-none focus:bg-[#fefce8] focus:-translate-y-[2px] focus:-translate-x-[2px] shadow-[2px_2px_0px_0px_var(--color-dark)] focus:shadow-[4px_4px_0px_0px_var(--color-dark)] transition-all duration-200"
             required
           />
         </div>
       )}
       <div>
-        <label className="block text-sm font-medium text-slate-700 mb-1">Name *</label>
+        <label className="block text-sm font-bold text-dark uppercase mb-2">Name *</label>
         <input
           type="text"
           value={name}
           onChange={(e) => setName(e.target.value)}
-          className="w-full px-3 py-2 border border-slate-300 rounded-md"
+          className="w-full px-3 py-2 border-[3px] border-dark rounded-[8px] bg-white text-dark font-bold placeholder-muted focus:outline-none focus:bg-[#fefce8] focus:-translate-y-[2px] focus:-translate-x-[2px] shadow-[2px_2px_0px_0px_var(--color-dark)] focus:shadow-[4px_4px_0px_0px_var(--color-dark)] transition-all duration-200"
           required
         />
       </div>
       <div>
-        <label className="block text-sm font-medium text-slate-700 mb-1">Description</label>
+        <label className="block text-sm font-bold text-dark uppercase mb-2">Description</label>
         <input
           type="text"
           value={description}
           onChange={(e) => setDescription(e.target.value)}
-          className="w-full px-3 py-2 border border-slate-300 rounded-md"
+          className="w-full px-3 py-2 border-[3px] border-dark rounded-[8px] bg-white text-dark font-bold placeholder-muted focus:outline-none focus:bg-[#fefce8] focus:-translate-y-[2px] focus:-translate-x-[2px] shadow-[2px_2px_0px_0px_var(--color-dark)] focus:shadow-[4px_4px_0px_0px_var(--color-dark)] transition-all duration-200"
         />
       </div>
       <div>
-        <label className="block text-sm font-medium text-slate-700 mb-1">Category</label>
+        <label className="block text-sm font-bold text-dark uppercase mb-2">Category</label>
         <select
           value={categoryId}
           onChange={(e) => setCategoryId(e.target.value)}
-          className="w-full px-3 py-2 border border-slate-300 rounded-md"
+          className="w-full px-3 py-2 border-[3px] border-dark rounded-[8px] bg-white text-dark font-bold placeholder-muted focus:outline-none focus:bg-[#fefce8] focus:-translate-y-[2px] focus:-translate-x-[2px] shadow-[2px_2px_0px_0px_var(--color-dark)] focus:shadow-[4px_4px_0px_0px_var(--color-dark)] transition-all duration-200"
         >
           <option value="">None</option>
           {categories.map((c) => (
@@ -495,23 +495,23 @@ function ProductForm({
         </select>
       </div>
       <div>
-        <label className="block text-sm font-medium text-slate-700 mb-1">Unit</label>
+        <label className="block text-sm font-bold text-dark uppercase mb-2">Unit</label>
         <input
           type="text"
           value={unit}
           onChange={(e) => setUnit(e.target.value)}
-          className="w-full px-3 py-2 border border-slate-300 rounded-md"
+          className="w-full px-3 py-2 border-[3px] border-dark rounded-[8px] bg-white text-dark font-bold placeholder-muted focus:outline-none focus:bg-[#fefce8] focus:-translate-y-[2px] focus:-translate-x-[2px] shadow-[2px_2px_0px_0px_var(--color-dark)] focus:shadow-[4px_4px_0px_0px_var(--color-dark)] transition-all duration-200"
         />
       </div>
       <div>
-        <label className="block text-sm font-medium text-slate-700 mb-1">Min stock (optional, default 0)</label>
+        <label className="block text-sm font-bold text-dark uppercase mb-2">Min stock (optional, default 0)</label>
         <input
           type="number"
           min={0}
           value={minStock}
           onChange={(e) => setMinStock(parseInt(e.target.value, 10) || 0)}
           placeholder="0"
-          className="w-full px-3 py-2 border border-slate-300 rounded-md"
+          className="w-full px-3 py-2 border-[3px] border-dark rounded-[8px] bg-white text-dark font-bold placeholder-muted focus:outline-none focus:bg-[#fefce8] focus:-translate-y-[2px] focus:-translate-x-[2px] shadow-[2px_2px_0px_0px_var(--color-dark)] focus:shadow-[4px_4px_0px_0px_var(--color-dark)] transition-all duration-200"
         />
       </div>
       {mode === "create" && warehouses.length > 0 && (
@@ -520,14 +520,14 @@ function ProductForm({
           <p className="text-sm font-medium text-slate-700">Initial quantity *</p>
           <div className="grid grid-cols-3 gap-3">
             <div>
-              <label className="block text-xs text-slate-500 mb-0.5">Warehouse *</label>
+              <label className="block text-xs font-bold text-dark uppercase mb-1">Warehouse *</label>
               <select
                 value={warehouseId}
                 onChange={(e) => {
                   setWarehouseId(e.target.value);
                   setLocationId("");
                 }}
-                className="w-full px-3 py-2 border border-slate-300 rounded-md text-sm"
+                className="w-full px-3 py-2 border-[3px] border-dark rounded-[8px] bg-white text-dark font-bold placeholder-muted focus:outline-none focus:bg-[#fefce8] focus:-translate-y-[2px] focus:-translate-x-[2px] shadow-[2px_2px_0px_0px_var(--color-dark)] focus:shadow-[4px_4px_0px_0px_var(--color-dark)] transition-all duration-200 text-sm"
                 required
               >
                 <option value="">Select…</option>
@@ -539,11 +539,11 @@ function ProductForm({
               </select>
             </div>
             <div>
-              <label className="block text-xs text-slate-500 mb-0.5">Location *</label>
+              <label className="block text-xs font-bold text-dark uppercase mb-1">Location *</label>
               <select
                 value={locationId}
                 onChange={(e) => setLocationId(e.target.value)}
-                className="w-full px-3 py-2 border border-slate-300 rounded-md text-sm"
+                className="w-full px-3 py-2 border-[3px] border-dark rounded-[8px] bg-white text-dark font-bold placeholder-muted focus:outline-none focus:bg-[#fefce8] focus:-translate-y-[2px] focus:-translate-x-[2px] shadow-[2px_2px_0px_0px_var(--color-dark)] focus:shadow-[4px_4px_0px_0px_var(--color-dark)] transition-all duration-200 text-sm"
                 required
                 disabled={!warehouseId}
               >
@@ -556,13 +556,13 @@ function ProductForm({
               </select>
             </div>
             <div>
-              <label className="block text-xs text-slate-500 mb-0.5">Quantity *</label>
+              <label className="block text-xs font-bold text-dark uppercase mb-1">Quantity *</label>
               <input
                 type="number"
                 min={0}
                 value={initialQuantity}
                 onChange={(e) => setInitialQuantity(parseInt(e.target.value, 10) || 0)}
-                className="w-full px-3 py-2 border border-slate-300 rounded-md text-sm"
+                className="w-full px-3 py-2 border-[3px] border-dark rounded-[8px] bg-white text-dark font-bold placeholder-muted focus:outline-none focus:bg-[#fefce8] focus:-translate-y-[2px] focus:-translate-x-[2px] shadow-[2px_2px_0px_0px_var(--color-dark)] focus:shadow-[4px_4px_0px_0px_var(--color-dark)] transition-all duration-200 text-sm"
                 required
               />
             </div>
@@ -575,14 +575,14 @@ function ProductForm({
           <p className="text-sm font-medium text-slate-700">Update quantity (optional)</p>
           <div className="grid grid-cols-3 gap-3">
             <div>
-              <label className="block text-xs text-slate-500 mb-0.5">Warehouse</label>
+              <label className="block text-xs font-bold text-dark uppercase mb-1">Warehouse</label>
               <select
                 value={warehouseId}
                 onChange={(e) => {
                   setWarehouseId(e.target.value);
                   setLocationId("");
                 }}
-                className="w-full px-3 py-2 border border-slate-300 rounded-md text-sm"
+                className="w-full px-3 py-2 border-[3px] border-dark rounded-[8px] bg-white text-dark font-bold placeholder-muted focus:outline-none focus:bg-[#fefce8] focus:-translate-y-[2px] focus:-translate-x-[2px] shadow-[2px_2px_0px_0px_var(--color-dark)] focus:shadow-[4px_4px_0px_0px_var(--color-dark)] transition-all duration-200 text-sm"
               >
                 <option value="">—</option>
                 {warehouses.map((w) => (
@@ -593,11 +593,11 @@ function ProductForm({
               </select>
             </div>
             <div>
-              <label className="block text-xs text-slate-500 mb-0.5">Location</label>
+              <label className="block text-xs font-bold text-dark uppercase mb-1">Location</label>
               <select
                 value={locationId}
                 onChange={(e) => setLocationId(e.target.value)}
-                className="w-full px-3 py-2 border border-slate-300 rounded-md text-sm"
+                className="w-full px-3 py-2 border-[3px] border-dark rounded-[8px] bg-white text-dark font-bold placeholder-muted focus:outline-none focus:bg-[#fefce8] focus:-translate-y-[2px] focus:-translate-x-[2px] shadow-[2px_2px_0px_0px_var(--color-dark)] focus:shadow-[4px_4px_0px_0px_var(--color-dark)] transition-all duration-200 text-sm"
                 disabled={!warehouseId}
               >
                 <option value="">—</option>
@@ -609,26 +609,26 @@ function ProductForm({
               </select>
             </div>
             <div>
-              <label className="block text-xs text-slate-500 mb-0.5">Quantity</label>
+              <label className="block text-xs font-bold text-dark uppercase mb-1">Quantity</label>
               <input
                 type="number"
                 min={0}
                 value={initialQuantity}
                 onChange={(e) => setInitialQuantity(parseInt(e.target.value, 10) || 0)}
-                className="w-full px-3 py-2 border border-slate-300 rounded-md text-sm"
+                className="w-full px-3 py-2 border-[3px] border-dark rounded-[8px] bg-white text-dark font-bold placeholder-muted focus:outline-none focus:bg-[#fefce8] focus:-translate-y-[2px] focus:-translate-x-[2px] shadow-[2px_2px_0px_0px_var(--color-dark)] focus:shadow-[4px_4px_0px_0px_var(--color-dark)] transition-all duration-200 text-sm"
               />
             </div>
           </div>
         </>
       )}
       <div className="flex justify-end gap-2 pt-2">
-        <button type="button" onClick={onCancel} className="px-3 py-2 border border-slate-300 rounded-md hover:bg-slate-50">
+        <button type="button" onClick={onCancel} className="px-3 py-2 bg-card text-dark font-bold uppercase border-[3px] border-dark rounded-[8px] hover:bg-accent hover:-translate-y-[2px] hover:-translate-x-[2px] shadow-[2px_2px_0px_0px_var(--color-dark)] hover:shadow-[4px_4px_0px_0px_var(--color-dark)] transition-all duration-200 rounded-md ">
           Cancel
         </button>
         <button
           type="submit"
           disabled={loading}
-          className="px-3 py-2 bg-slate-800 text-white rounded-md hover:bg-slate-700 disabled:opacity-50"
+          className="px-3 py-2 bg-dark text-white font-bold uppercase border-[3px] border-dark rounded-[8px] hover:-translate-y-[2px] hover:-translate-x-[2px] shadow-[2px_2px_0px_0px_var(--color-dark)] hover:shadow-[4px_4px_0px_0px_var(--color-dark)] transition-all duration-200 rounded-md hover:bg-slate-700 disabled:opacity-50"
         >
           {loading ? "Saving…" : "Save"}
         </button>

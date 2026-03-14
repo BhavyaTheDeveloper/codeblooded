@@ -76,11 +76,11 @@ export function Transfers() {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-semibold text-slate-800">Internal transfers</h1>
+        <h1 className="text-3xl font-bold text-dark uppercase tracking-widest border-b-[3px] border-dark pb-4">Internal transfers</h1>
         <button
           type="button"
           onClick={() => setCreateModalOpen(true)}
-          className="px-3 py-2 text-sm bg-slate-800 text-white rounded-md hover:bg-slate-700"
+          className="px-3 py-2 text-sm bg-dark text-white font-bold uppercase border-[3px] border-dark rounded-[8px] hover:-translate-y-[2px] hover:-translate-x-[2px] shadow-[2px_2px_0px_0px_var(--color-dark)] hover:shadow-[4px_4px_0px_0px_var(--color-dark)] transition-all duration-200 rounded-md hover:bg-slate-700"
         >
           Create transfer
         </button>
@@ -89,7 +89,7 @@ export function Transfers() {
         <select
           value={status}
           onChange={(e) => setStatus(e.target.value)}
-          className="px-3 py-2 border border-slate-300 rounded-md"
+          className="px-3 py-2 border-[3px] border-dark rounded-[8px] bg-white text-dark font-bold placeholder-muted focus:outline-none focus:bg-[#fefce8] focus:-translate-y-[2px] focus:-translate-x-[2px] shadow-[2px_2px_0px_0px_var(--color-dark)] focus:shadow-[4px_4px_0px_0px_var(--color-dark)] transition-all duration-200"
         >
           <option value="">All statuses</option>
           <option value="DRAFT">Draft</option>
@@ -97,12 +97,12 @@ export function Transfers() {
         </select>
       </Card>
       <Card title="Transfers">
-        {isLoading && <p className="text-slate-500">Loading…</p>}
-        {error && <p className="text-red-600">Failed to load</p>}
+        {isLoading && <p className="text-muted font-bold uppercase">Loading…</p>}
+        {error && <p className="text-primary font-bold uppercase">Failed to load</p>}
         {data && (
           <DataTable columns={["Number", "From", "To", "Status", "Created", "Actions"]}>
             {data.map((t) => (
-              <tr key={t.id}>
+              <tr key={t.id} className="hover:bg-accent transition-colors duration-200">
                 <td className="px-4 py-2 text-sm font-mono">{t.transferNumber}</td>
                 <td className="px-4 py-2 text-sm">{t.fromWarehouse?.name ?? "—"}</td>
                 <td className="px-4 py-2 text-sm">{t.toWarehouse?.name ?? "—"}</td>
@@ -199,11 +199,11 @@ function CreateTransferForm({
     <form onSubmit={handleSubmit} className="space-y-3">
       {error && <p className="text-sm text-red-600">{error}</p>}
       <div>
-        <label className="block text-sm font-medium text-slate-700 mb-1">From warehouse *</label>
+        <label className="block text-sm font-bold text-dark uppercase mb-2">From warehouse *</label>
         <select
           value={fromWarehouseId}
           onChange={(e) => setFromWarehouseId(e.target.value)}
-          className="w-full px-3 py-2 border border-slate-300 rounded-md"
+          className="w-full px-3 py-2 border-[3px] border-dark rounded-[8px] bg-white text-dark font-bold placeholder-muted focus:outline-none focus:bg-[#fefce8] focus:-translate-y-[2px] focus:-translate-x-[2px] shadow-[2px_2px_0px_0px_var(--color-dark)] focus:shadow-[4px_4px_0px_0px_var(--color-dark)] transition-all duration-200"
           required
         >
           <option value="">Select</option>
@@ -213,11 +213,11 @@ function CreateTransferForm({
         </select>
       </div>
       <div>
-        <label className="block text-sm font-medium text-slate-700 mb-1">To warehouse *</label>
+        <label className="block text-sm font-bold text-dark uppercase mb-2">To warehouse *</label>
         <select
           value={toWarehouseId}
           onChange={(e) => setToWarehouseId(e.target.value)}
-          className="w-full px-3 py-2 border border-slate-300 rounded-md"
+          className="w-full px-3 py-2 border-[3px] border-dark rounded-[8px] bg-white text-dark font-bold placeholder-muted focus:outline-none focus:bg-[#fefce8] focus:-translate-y-[2px] focus:-translate-x-[2px] shadow-[2px_2px_0px_0px_var(--color-dark)] focus:shadow-[4px_4px_0px_0px_var(--color-dark)] transition-all duration-200"
           required
         >
           <option value="">Select</option>
@@ -227,8 +227,8 @@ function CreateTransferForm({
         </select>
       </div>
       <div>
-        <label className="block text-sm font-medium text-slate-700 mb-1">Notes</label>
-        <input type="text" value={notes} onChange={(e) => setNotes(e.target.value)} className="w-full px-3 py-2 border border-slate-300 rounded-md" />
+        <label className="block text-sm font-bold text-dark uppercase mb-2">Notes</label>
+        <input type="text" value={notes} onChange={(e) => setNotes(e.target.value)} className="w-full px-3 py-2 border-[3px] border-dark rounded-[8px] bg-white text-dark font-bold placeholder-muted focus:outline-none focus:bg-[#fefce8] focus:-translate-y-[2px] focus:-translate-x-[2px] shadow-[2px_2px_0px_0px_var(--color-dark)] focus:shadow-[4px_4px_0px_0px_var(--color-dark)] transition-all duration-200" />
       </div>
       <div>
         <div className="flex items-center justify-between mb-1">
@@ -285,8 +285,8 @@ function CreateTransferForm({
         </div>
       </div>
       <div className="flex justify-end gap-2 pt-2">
-        <button type="button" onClick={onCancel} className="px-3 py-2 border border-slate-300 rounded-md hover:bg-slate-50">Cancel</button>
-        <button type="submit" disabled={loading} className="px-3 py-2 bg-slate-800 text-white rounded-md hover:bg-slate-700 disabled:opacity-50">
+        <button type="button" onClick={onCancel} className="px-3 py-2 bg-card text-dark font-bold uppercase border-[3px] border-dark rounded-[8px] hover:bg-accent hover:-translate-y-[2px] hover:-translate-x-[2px] shadow-[2px_2px_0px_0px_var(--color-dark)] hover:shadow-[4px_4px_0px_0px_var(--color-dark)] transition-all duration-200 rounded-md ">Cancel</button>
+        <button type="submit" disabled={loading} className="px-3 py-2 bg-dark text-white font-bold uppercase border-[3px] border-dark rounded-[8px] hover:-translate-y-[2px] hover:-translate-x-[2px] shadow-[2px_2px_0px_0px_var(--color-dark)] hover:shadow-[4px_4px_0px_0px_var(--color-dark)] transition-all duration-200 rounded-md hover:bg-slate-700 disabled:opacity-50">
           {loading ? "Creating…" : "Create transfer"}
         </button>
       </div>
