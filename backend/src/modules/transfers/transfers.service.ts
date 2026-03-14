@@ -22,13 +22,17 @@ export async function createTransfer(data: CreateTransferInput, createdById: str
   await prisma.warehouse.findUniqueOrThrow({ where: { id: data.toWarehouseId } });
   const transferNumber = await getNextTransferNumber();
 
+  // Only set createdById if the user actually exists to avoid FK errors
+  const creator = createdById ? await prisma.user.findUnique({ where: { id: createdById } }) : null;
+  const safeCreatedById = creator?.id;
+
   return prisma.transfer.create({
     data: {
       transferNumber,
       fromWarehouseId: data.fromWarehouseId,
       toWarehouseId: data.toWarehouseId,
       notes: data.notes ?? null,
-      createdById,
+      ...(safeCreatedById && { createdById: safeCreatedById }),
       status: TransferStatus.DRAFT,
       items: {
         create: data.items.map((item) => ({

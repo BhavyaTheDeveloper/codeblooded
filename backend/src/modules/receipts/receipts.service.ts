@@ -23,13 +23,17 @@ export async function createReceipt(data: CreateReceiptInput, createdById: strin
   const warehouse = await prisma.warehouse.findUniqueOrThrow({ where: { id: data.warehouseId } });
   const receiptNumber = await getNextReceiptNumber();
 
+  // Only set createdById if the user actually exists to avoid FK errors
+  const creator = createdById ? await prisma.user.findUnique({ where: { id: createdById } }) : null;
+  const safeCreatedById = creator?.id;
+
   const receipt = await prisma.receipt.create({
     data: {
       receiptNumber,
       supplier: data.supplier ?? null,
       warehouseId: data.warehouseId,
       notes: data.notes ?? null,
-      createdById,
+      ...(safeCreatedById && { createdById: safeCreatedById }),
       status: ReceiptStatus.DRAFT,
       items: {
         create: data.items.map((item) => ({

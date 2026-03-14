@@ -21,13 +21,17 @@ export async function createDelivery(data: CreateDeliveryInput, createdById: str
   await prisma.warehouse.findUniqueOrThrow({ where: { id: data.warehouseId } });
   const deliveryNumber = await getNextDeliveryNumber();
 
+  // Only set createdById if the user actually exists to avoid FK errors
+  const creator = createdById ? await prisma.user.findUnique({ where: { id: createdById } }) : null;
+  const safeCreatedById = creator?.id;
+
   return prisma.delivery.create({
     data: {
       deliveryNumber,
       customer: data.customer ?? null,
       warehouseId: data.warehouseId,
       notes: data.notes ?? null,
-      createdById,
+      ...(safeCreatedById && { createdById: safeCreatedById }),
       status: DeliveryStatus.DRAFT,
       items: {
         create: data.items.map((item) => ({

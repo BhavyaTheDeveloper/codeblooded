@@ -21,13 +21,17 @@ export async function createAdjustment(data: CreateAdjustmentInput, createdById:
   await prisma.warehouse.findUniqueOrThrow({ where: { id: data.warehouseId } });
   const adjustmentNumber = await getNextAdjustmentNumber();
 
+  // Only set createdById if the user actually exists to avoid FK errors
+  const creator = createdById ? await prisma.user.findUnique({ where: { id: createdById } }) : null;
+  const safeCreatedById = creator?.id;
+
   return prisma.adjustment.create({
     data: {
       adjustmentNumber,
       warehouseId: data.warehouseId,
       reason: data.reason,
       notes: data.notes ?? null,
-      createdById,
+      ...(safeCreatedById && { createdById: safeCreatedById }),
       status: AdjustmentStatus.DRAFT,
       items: {
         create: data.items.map((item) => ({
