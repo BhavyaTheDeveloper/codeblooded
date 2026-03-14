@@ -71,6 +71,7 @@ export function Adjustments() {
       queryClient.invalidateQueries({ queryKey: ["adjustments"] });
       queryClient.invalidateQueries({ queryKey: ["inventory"] });
       queryClient.invalidateQueries({ queryKey: ["dashboard"] });
+      queryClient.invalidateQueries({ queryKey: ["ledger"] });
     },
   });
 

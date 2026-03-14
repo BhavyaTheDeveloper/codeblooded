@@ -33,7 +33,9 @@ export async function createProduct(data: CreateProductInput) {
         locationId: data.initialStock.locationId,
         quantity: data.initialStock.quantity,
       },
-      update: { quantity: { increment: data.initialStock.quantity } },
+      // When seeding or re-seeding initial stock, treat the provided
+      // quantity as the authoritative value instead of incrementing.
+      update: { quantity: data.initialStock.quantity },
     });
   }
   return product;

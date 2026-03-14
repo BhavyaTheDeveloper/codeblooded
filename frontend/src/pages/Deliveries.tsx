@@ -24,6 +24,7 @@ export function Deliveries() {
   const [warehouseId, setWarehouseId] = useState("");
   const [status, setStatus] = useState("");
   const [createModalOpen, setCreateModalOpen] = useState(false);
+  const [actionError, setActionError] = useState("");
   const queryClient = useQueryClient();
 
   const { data: whRes } = useQuery({
@@ -61,6 +62,21 @@ export function Deliveries() {
     },
   });
 
+  const updateStatus = useMutation({
+    mutationFn: async (args: { id: string; status: "DRAFT" | "PICKED" | "PACKED" }) => {
+      const r = await deliveriesApi.updateStatus(args.id, args.status);
+      if (!r.success) throw new Error(r.error);
+      return r.data;
+    },
+    onSuccess: () => {
+      setActionError("");
+      queryClient.invalidateQueries({ queryKey: ["deliveries"] });
+    },
+    onError: (err: unknown) => {
+      setActionError(err instanceof Error ? err.message : "Failed to update status");
+    },
+  });
+
   const validateDelivery = useMutation({
     mutationFn: async (id: string) => {
       const r = await deliveriesApi.validate(id);
@@ -68,9 +84,14 @@ export function Deliveries() {
       return r.data;
     },
     onSuccess: () => {
+      setActionError("");
       queryClient.invalidateQueries({ queryKey: ["deliveries"] });
       queryClient.invalidateQueries({ queryKey: ["inventory"] });
       queryClient.invalidateQueries({ queryKey: ["dashboard"] });
+      queryClient.invalidateQueries({ queryKey: ["ledger"] });
+    },
+    onError: (err: unknown) => {
+      setActionError(err instanceof Error ? err.message : "Failed to validate delivery");
     },
   });
 
@@ -112,6 +133,7 @@ export function Deliveries() {
         </div>
       </Card>
       <Card title="Deliveries">
+        {actionError && <p className="mb-2 text-primary font-bold uppercase text-sm">{actionError}</p>}
         {isLoading && <p className="text-muted font-bold uppercase">Loading…</p>}
         {error && <p className="text-primary font-bold uppercase">Failed to load</p>}
         {data && (
@@ -121,7 +143,23 @@ export function Deliveries() {
                 <td className="px-4 py-2 text-sm font-mono">{d.deliveryNumber}</td>
                 <td className="px-4 py-2 text-sm">{d.warehouse?.name ?? "—"}</td>
                 <td className="px-4 py-2 text-sm">{d.customer ?? "—"}</td>
-                <td className="px-4 py-2 text-sm">{d.status}</td>
+                <td className="px-4 py-2 text-sm">
+                  {d.status !== "VALIDATED" ? (
+                    <select
+                      value={d.status}
+                      onChange={(e) =>
+                        updateStatus.mutate({ id: d.id, status: e.target.value as "DRAFT" | "PICKED" | "PACKED" })
+                      }
+                      className="px-2 py-1 border border-dark rounded-[6px] bg-white text-xs font-bold uppercase"
+                    >
+                      <option value="DRAFT">Draft</option>
+                      <option value="PICKED">Picked</option>
+                      <option value="PACKED">Packed</option>
+                    </select>
+                  ) : (
+                    <span>{d.status}</span>
+                  )}
+                </td>
                 <td className="px-4 py-2 text-sm">{new Date(d.createdAt).toLocaleString()}</td>
                 <td className="px-4 py-2">
                   {d.status !== "VALIDATED" && (

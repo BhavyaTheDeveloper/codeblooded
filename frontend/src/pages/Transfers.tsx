@@ -70,6 +70,7 @@ export function Transfers() {
       queryClient.invalidateQueries({ queryKey: ["transfers"] });
       queryClient.invalidateQueries({ queryKey: ["inventory"] });
       queryClient.invalidateQueries({ queryKey: ["dashboard"] });
+      queryClient.invalidateQueries({ queryKey: ["ledger"] });
     },
   });
 
@@ -189,8 +190,15 @@ function CreateTransferForm({
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!fromWarehouseId || !toWarehouseId) return;
-    if (fromWarehouseId === toWarehouseId) return;
-    const validItems = items.filter((row) => row.productId && row.fromLocationId && row.toLocationId && row.quantity > 0);
+    // Allow transfers within the same warehouse, but require different locations per row.
+    const validItems = items.filter(
+      (row) =>
+        row.productId &&
+        row.fromLocationId &&
+        row.toLocationId &&
+        row.fromLocationId !== row.toLocationId &&
+        row.quantity > 0
+    );
     if (validItems.length === 0) return;
     onSubmit({ fromWarehouseId, toWarehouseId, notes: notes.trim() || undefined, items: validItems });
   };

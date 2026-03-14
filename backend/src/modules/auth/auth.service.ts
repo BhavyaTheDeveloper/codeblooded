@@ -2,6 +2,7 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import { prisma } from "../../lib/prisma.js";
 import { config } from "../../config/index.js";
+import { sendMail } from "../../shared/email/mailer.js";
 import type { SignupInput, LoginInput, ForgotPasswordInput, ResetPasswordInput } from "./auth.validation.js";
 import type { AuthResult } from "./auth.types.js";
 
@@ -69,7 +70,15 @@ export async function forgotPassword(input: ForgotPasswordInput): Promise<{ mess
     where: { id: user.id },
     data: { otpCode, otpExpiresAt },
   });
-  console.log(`[DEV] OTP for ${user.email}: ${otpCode}`);
+  const sent = await sendMail({
+    to: user.email,
+    subject: "Password reset code",
+    text: `Your password reset code is ${otpCode}. It expires in ${OTP_EXPIRY_MINUTES} minutes.`,
+    html: `<p>Your password reset code is <strong>${otpCode}</strong>. It expires in ${OTP_EXPIRY_MINUTES} minutes.</p>`,
+  });
+  if (!sent) {
+    console.log(`[DEV] OTP for ${user.email}: ${otpCode}`);
+  }
   return { message: "If the email exists, a reset code has been sent." };
 }
 
