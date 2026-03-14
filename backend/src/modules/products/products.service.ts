@@ -7,7 +7,7 @@ export async function createProduct(data: CreateProductInput) {
   if (existing) {
     throw Object.assign(new Error("Product with this SKU already exists"), { status: 400, code: "SKU_EXISTS" });
   }
-  return prisma.product.create({
+  const product = await prisma.product.create({
     data: {
       sku: data.sku,
       name: data.name,
@@ -18,6 +18,25 @@ export async function createProduct(data: CreateProductInput) {
     },
     include: { category: true },
   });
+  if (data.initialStock) {
+    await prisma.inventory.upsert({
+      where: {
+        productId_warehouseId_locationId: {
+          productId: product.id,
+          warehouseId: data.initialStock.warehouseId,
+          locationId: data.initialStock.locationId,
+        },
+      },
+      create: {
+        productId: product.id,
+        warehouseId: data.initialStock.warehouseId,
+        locationId: data.initialStock.locationId,
+        quantity: data.initialStock.quantity,
+      },
+      update: { quantity: { increment: data.initialStock.quantity } },
+    });
+  }
+  return product;
 }
 
 export async function listProducts(query: ListProductsQuery) {
@@ -43,7 +62,25 @@ export async function listProducts(query: ListProductsQuery) {
     }),
     prisma.product.count({ where: Object.keys(where).length ? where : undefined }),
   ]);
-  return { items, total };
+
+  // Compute current stock per product from Inventory and attach it to each product
+  const productIds = items.map((p) => p.id);
+  let stockByProduct = new Map<string, number>();
+  if (productIds.length > 0) {
+    const inventoryAgg = await prisma.inventory.groupBy({
+      by: ["productId"],
+      where: { productId: { in: productIds } },
+      _sum: { quantity: true },
+    });
+    stockByProduct = new Map(inventoryAgg.map((row) => [row.productId, row._sum.quantity ?? 0]));
+  }
+
+  const itemsWithStock = items.map((p) => ({
+    ...p,
+    currentStock: stockByProduct.get(p.id) ?? 0,
+  }));
+
+  return { items: itemsWithStock, total };
 }
 
 export async function getProductById(id: string) {
@@ -61,7 +98,7 @@ export async function getProductBySku(sku: string) {
 }
 
 export async function updateProduct(id: string, data: UpdateProductInput) {
-  return prisma.product.update({
+  const product = await prisma.product.update({
     where: { id },
     data: {
       ...(data.name !== undefined && { name: data.name }),
@@ -72,6 +109,25 @@ export async function updateProduct(id: string, data: UpdateProductInput) {
     },
     include: { category: true },
   });
+  if (data.setStock) {
+    await prisma.inventory.upsert({
+      where: {
+        productId_warehouseId_locationId: {
+          productId: id,
+          warehouseId: data.setStock.warehouseId,
+          locationId: data.setStock.locationId,
+        },
+      },
+      create: {
+        productId: id,
+        warehouseId: data.setStock.warehouseId,
+        locationId: data.setStock.locationId,
+        quantity: data.setStock.quantity,
+      },
+      update: { quantity: data.setStock.quantity },
+    });
+  }
+  return product;
 }
 
 export async function deleteProduct(id: string) {

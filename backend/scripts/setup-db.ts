@@ -1,19 +1,13 @@
 /**
  * One-command DB setup: create database (if needed), push schema, seed.
- * Usage:
- *   Set SERVER_URL or DATABASE_URL in .env, then: npm run db:setup
- *   Or: SERVER_URL="postgresql://user:pass@host:5432/postgres" npm run db:setup
- *
- * SERVER_URL = postgres server link → we create inventory_db and use it.
- * DATABASE_URL = full link to your DB → we only push + seed (no create).
+ * Only DATABASE_URL is used. Set it in .env to your target DB (e.g. inventory_db).
+ * If that database doesn't exist yet, we create it by connecting to "postgres" on the same server.
  */
 
 import "dotenv/config";
 import { execSync } from "child_process";
-import { readFileSync, writeFileSync, existsSync } from "fs";
+import { readFileSync, existsSync } from "fs";
 import { join } from "path";
-
-const DB_NAME = "inventory_db";
 
 function parseUrl(url: string): URL {
   try {
@@ -23,38 +17,44 @@ function parseUrl(url: string): URL {
   }
 }
 
+function getDatabaseName(parsed: URL): string {
+  const path = parsed.pathname.replace(/^\//, "").trim();
+  return path || "postgres";
+}
+
 function buildConnectionUrl(parsed: URL, database: string): string {
   const u = new URL(parsed.toString());
   u.pathname = `/${database}`;
   return u.toString();
 }
 
-async function ensureDatabase(serverUrl: string): Promise<string> {
-  const parsed = parseUrl(serverUrl);
-  const dbFromPath = parsed.pathname.replace(/^\//, "").trim() || "postgres";
-  const adminDb = dbFromPath === DB_NAME ? "postgres" : dbFromPath;
-  const adminUrl = buildConnectionUrl(parsed, adminDb);
+async function ensureDatabase(databaseUrl: string): Promise<void> {
+  const parsed = parseUrl(databaseUrl);
+  const dbName = getDatabaseName(parsed);
+  if (dbName === "postgres" || dbName === "template1") {
+    console.log("DATABASE_URL points to postgres/template1; skipping create. Use a DB name like inventory_db.");
+    return;
+  }
 
+  const postgresUrl = buildConnectionUrl(parsed, "postgres");
   const { Client } = await import("pg");
-  const client = new Client({ connectionString: adminUrl });
+  const client = new Client({ connectionString: postgresUrl });
 
   try {
     await client.connect();
     const res = await client.query(
       "SELECT 1 FROM pg_database WHERE datname = $1",
-      [DB_NAME]
+      [dbName]
     );
     if (res.rows.length === 0) {
-      await client.query(`CREATE DATABASE ${DB_NAME}`);
-      console.log(`Created database: ${DB_NAME}`);
+      await client.query(`CREATE DATABASE ${dbName}`);
+      console.log(`Created database: ${dbName}`);
     } else {
-      console.log(`Database ${DB_NAME} already exists.`);
+      console.log(`Database ${dbName} already exists.`);
     }
   } finally {
     await client.end();
   }
-
-  return buildConnectionUrl(parsed, DB_NAME);
 }
 
 function run(cmd: string, env: NodeJS.ProcessEnv = {}): void {
@@ -67,38 +67,24 @@ function run(cmd: string, env: NodeJS.ProcessEnv = {}): void {
 
 async function main(): Promise<void> {
   const envPath = join(process.cwd(), ".env");
-  let envContent = existsSync(envPath) ? readFileSync(envPath, "utf-8") : "";
-
   let databaseUrl = process.env.DATABASE_URL;
-  const serverUrl = process.env.SERVER_URL;
 
-  if (serverUrl) {
-    console.log("Using SERVER_URL to create database...");
-    databaseUrl = await ensureDatabase(serverUrl);
-    if (!envContent.includes("DATABASE_URL=")) {
-      envContent += `\nDATABASE_URL="${databaseUrl}?schema=public"\n`;
-    } else {
-      envContent = envContent.replace(
-        /DATABASE_URL=.*/,
-        `DATABASE_URL="${databaseUrl}?schema=public"`
-      );
-    }
-    writeFileSync(envPath, envContent.trimEnd() + "\n", "utf-8");
-    console.log("Updated .env with DATABASE_URL.");
-  } else if (envContent) {
+  if (!databaseUrl && existsSync(envPath)) {
+    const envContent = readFileSync(envPath, "utf-8");
     const match = envContent.match(/DATABASE_URL=(?:"([^"]+)"|(\S+))/);
-    if (match) databaseUrl = databaseUrl ?? match[1] ?? match[2];
+    if (match) databaseUrl = (match[1] ?? match[2] ?? "").trim();
   }
 
   if (!databaseUrl) {
     console.error(
-      "Set SERVER_URL or DATABASE_URL in .env (or environment).\n\n" +
-        "Examples:\n" +
-        "  SERVER_URL=postgresql://user:password@localhost:5432/postgres\n" +
-        "  DATABASE_URL=postgresql://user:password@localhost:5432/inventory_db?schema=public"
+      "Set DATABASE_URL in .env. Example:\n  DATABASE_URL=\"postgresql://USER:PASSWORD@HOST:PORT/inventory_db?schema=public\"\n\n" +
+        "If inventory_db does not exist, db:setup will create it."
     );
     process.exit(1);
   }
+
+  const urlForConnect = databaseUrl.split("?")[0];
+  await ensureDatabase(urlForConnect);
 
   if (!databaseUrl.includes("?")) {
     databaseUrl = databaseUrl + "?schema=public";

@@ -28,7 +28,7 @@ cd backend
 cp .env.example .env
 ```
 
-Edit `.env`: set **SERVER_URL** to your PostgreSQL server (e.g. `postgresql://user:password@localhost:5432/postgres`). The setup script will create `inventory_db` for you.
+Edit `.env`: set **DATABASE_URL** to your PostgreSQL connection string (e.g. `postgresql://user:password@localhost:5432/inventory_db?schema=public`). If `inventory_db` doesn’t exist, `db:setup` will create it.
 
 ```bash
 npm install

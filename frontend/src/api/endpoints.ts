@@ -33,11 +33,27 @@ export const productsApi = {
     if (params?.take != null) q.set("take", String(params.take));
     return get<{ items: unknown[]; total: number }>(`/products?${q}`);
   },
-  create: (body: { sku: string; name: string; description?: string; unit?: string; minStock?: number; categoryId?: string | null }) =>
-    post("/products", body),
+  create: (body: {
+    sku: string;
+    name: string;
+    description?: string;
+    unit?: string;
+    minStock?: number;
+    categoryId?: string | null;
+    initialStock: { warehouseId: string; locationId: string; quantity: number };
+  }) => post("/products", body),
   get: (id: string) => get(`/products/${id}`),
-  update: (id: string, body: { name?: string; description?: string; unit?: string; minStock?: number; categoryId?: string | null }) =>
-    patch(`/products/${id}`, body),
+  update: (
+    id: string,
+    body: {
+      name?: string;
+      description?: string;
+      unit?: string;
+      minStock?: number;
+      categoryId?: string | null;
+      setStock?: { warehouseId: string; locationId: string; quantity: number };
+    }
+  ) => patch(`/products/${id}`, body),
   delete: (id: string) => del(`/products/${id}`),
 };
 

@@ -7,6 +7,11 @@ export const createProductSchema = z.object({
   unit: z.string().default("UNIT"),
   minStock: z.number().int().min(0).optional().default(0),
   categoryId: z.string().cuid().optional().nullable(),
+  initialStock: z.object({
+    warehouseId: z.string().cuid(),
+    locationId: z.string().cuid(),
+    quantity: z.number().int().min(0),
+  }),
 });
 
 export const updateProductSchema = z.object({
@@ -15,13 +20,21 @@ export const updateProductSchema = z.object({
   unit: z.string().optional(),
   minStock: z.number().int().min(0).optional(),
   categoryId: z.string().cuid().optional().nullable(),
+  setStock: z
+    .object({
+      warehouseId: z.string().cuid(),
+      locationId: z.string().cuid(),
+      quantity: z.number().int().min(0),
+    })
+    .optional(),
 });
 
 export const listProductsQuerySchema = z.object({
   search: z.string().optional(),
   categoryId: z.string().cuid().optional(),
   skip: z.coerce.number().int().min(0).optional().default(0),
-  take: z.coerce.number().int().min(1).max(100).optional().default(20),
+  // Allow larger page sizes so forms that load all products (e.g. receipts/deliveries) can request up to 500.
+  take: z.coerce.number().int().min(1).max(500).optional().default(50),
 });
 
 export type CreateProductInput = z.infer<typeof createProductSchema>;

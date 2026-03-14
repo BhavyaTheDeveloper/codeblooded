@@ -13,16 +13,16 @@ If you only need to run the app and have a PostgreSQL server:
    cd backend
    cp .env.example .env
    ```
-   Edit `backend/.env`: set **SERVER_URL** to your Postgres server link (user, password, host, port, and any existing DB name). Example:
+   Edit `backend/.env`: set **DATABASE_URL** to your Postgres link including the database name. Example:
    ```env
-   SERVER_URL="postgresql://postgres:YOUR_PASSWORD@localhost:5432/postgres"
+   DATABASE_URL="postgresql://postgres:YOUR_PASSWORD@localhost:5432/inventory_db?schema=public"
    ```
-   Then run:
+   If `inventory_db` doesn’t exist yet, the next step will create it. Then run:
    ```bash
    npm install
    npm run db:setup
    ```
-   This will **create** the `inventory_db` database (if it doesn’t exist), **push** the schema, and **seed** data. No need to create the DB in pgAdmin.
+   This will **create** the database (if it doesn’t exist), **push** the schema, and **seed** data.
 
 2. **Start backend**
    ```bash
