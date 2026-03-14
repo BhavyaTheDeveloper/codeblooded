@@ -4,6 +4,43 @@ This guide walks you through running the Inventory Management project from scrat
 
 ---
 
+## Quick path (for checkers / reviewers)
+
+If you only need to run the app and have a PostgreSQL server:
+
+1. **Backend**
+   ```bash
+   cd backend
+   cp .env.example .env
+   ```
+   Edit `backend/.env`: set **SERVER_URL** to your Postgres server link (user, password, host, port, and any existing DB name). Example:
+   ```env
+   SERVER_URL="postgresql://postgres:YOUR_PASSWORD@localhost:5432/postgres"
+   ```
+   Then run:
+   ```bash
+   npm install
+   npm run db:setup
+   ```
+   This will **create** the `inventory_db` database (if it doesn’t exist), **push** the schema, and **seed** data. No need to create the DB in pgAdmin.
+
+2. **Start backend**
+   ```bash
+   npm run dev
+   ```
+
+3. **Frontend** (in another terminal)
+   ```bash
+   cd frontend
+   npm install
+   npm run dev
+   ```
+   Open http://localhost:5173 and log in with `admin@example.com` / `password123`.
+
+**Re-running setup / testing:** You do **not** need to delete the database. Run `npm run db:setup` again anytime: it will reuse the existing DB, re-apply the schema (no-op if unchanged), and re-run the seed (seed is safe to run multiple times; it upserts/merges data).
+
+---
+
 ## Prerequisites
 
 - **Node.js** (v18 or newer). Check: open Terminal and run `node -v`. If not installed, download from [nodejs.org](https://nodejs.org).
@@ -51,7 +88,7 @@ To confirm the port in pgAdmin: right‑click your server → **Properties** →
 If user is `postgres` and password is `mypassword`, the URL is:
 
 ```text
-postgresql://postgres:mypassword@localhost:5432/inventory_db
+postgresql://postgres:090405@localhost:5433/inventory_db
 ```
 
 If your password has special characters (e.g. `@`, `#`, `%`), you may need to **URL‑encode** them or use a simple password for local dev.

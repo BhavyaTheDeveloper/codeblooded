@@ -50,6 +50,27 @@ warehouses ── locations ── inventory
 | **adjustment_items** | Product, quantity delta, reason |
 | **stock_ledger** | Every movement: document_type, document_id, product, warehouse, location, quantity_delta, balance_after |
 
+### How the tables are connected (foreign keys)
+
+The tables are **not** independent. Prisma relations generate real PostgreSQL **foreign keys** so data stays consistent:
+
+| Child table       | References (foreign keys) |
+|-------------------|---------------------------|
+| **products**      | `category_id` → categories.id |
+| **locations**     | `warehouse_id` → warehouses.id (unique per warehouse: warehouseId + code) |
+| **inventory**     | `product_id` → products, `warehouse_id` → warehouses, `location_id` → locations (one row per product+warehouse+location) |
+| **receipts**      | `warehouse_id` → warehouses, `created_by_id` → users |
+| **receipt_items** | `receipt_id` → receipts, `product_id` → products, `location_id` → locations (location must be in receipt’s warehouse) |
+| **deliveries**    | `warehouse_id` → warehouses, `created_by_id` → users |
+| **delivery_items**| `delivery_id` → deliveries, `product_id` → products, `location_id` → locations |
+| **transfers**     | `from_warehouse_id` → warehouses, `to_warehouse_id` → warehouses, `created_by_id` → users |
+| **transfer_items**| `transfer_id` → transfers, `product_id` → products, `from_location_id` → locations, `to_location_id` → locations |
+| **adjustments**   | `warehouse_id` → warehouses, `created_by_id` → users |
+| **adjustment_items** | `adjustment_id` → adjustments, `product_id` → products, `location_id` → locations |
+| **stock_ledger**  | `product_id` → products, `warehouse_id` → warehouses, `location_id` → locations, `created_by_id` → users |
+
+So: categories → products; warehouses → locations; products + warehouses + locations → inventory and all document line items; every document links to warehouse(s) and user; stock_ledger links to product, warehouse, location, and user.
+
 ### Stock Ledger Rule
 
 - **Every** stock change (receipt validated, delivery validated, transfer validated, adjustment validated) must insert one or more `stock_ledger` rows.

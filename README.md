@@ -21,29 +21,24 @@ Production-quality modular warehouse inventory application (Node.js + React).
 
 ## Quick start
 
-### 1. Database
-
-Create a PostgreSQL database and set the connection string:
+### 1. Backend (one-command DB setup)
 
 ```bash
 cd backend
 cp .env.example .env
-# Edit .env: set DATABASE_URL and JWT_SECRET
 ```
 
-### 2. Backend
+Edit `.env`: set **SERVER_URL** to your PostgreSQL server (e.g. `postgresql://user:password@localhost:5432/postgres`). The setup script will create `inventory_db` for you.
 
 ```bash
-cd backend
 npm install
-npx prisma db push
-npm run db:seed
+npm run db:setup
 npm run dev
 ```
 
-API runs at **http://localhost:4000**. Health: `GET /health`.
+`db:setup` creates the database (if needed), pushes the schema, and seeds data. You can run it again anytime without deleting the DB; seed is safe to re-run.
 
-### 3. Frontend
+### 2. Frontend
 
 ```bash
 cd frontend
@@ -51,9 +46,9 @@ npm install
 npm run dev
 ```
 
-App runs at **http://localhost:5173** and proxies `/api` to the backend.
+API runs at **http://localhost:4000**. Health: `GET /health`. App at **http://localhost:5173** (proxies `/api` to backend).
 
-### 4. Login
+### 3. Login
 
 After seeding, you can sign up a new user or use the seed admin:
 
